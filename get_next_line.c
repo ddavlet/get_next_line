@@ -6,67 +6,76 @@
 /*   By: ddavlety <ddavlety@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/24 12:41:47 by ddavlety          #+#    #+#             */
-/*   Updated: 2023/11/27 12:29:06 by ddavlety         ###   ########.fr       */
+/*   Updated: 2023/11/28 16:58:47 by ddavlety         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*write_to_buffer(char* txt, size_t buf_size)
-{
-	char	*buffer;
-	size_t	i;
+void	*ft_calloc(size_t nmemb, size_t size);
 
-	buffer = (char *)malloc((buf_size + 1) * sizeof (char));
-	if (!buffer)
-		return (0);
-	while (i <= buf_size)
-	{
-		buffer[i] = txt[i];
-		i++;
-	}
-	return (buffer);
-}
-
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+long	find_newline(char *txt)
 {
-	char			*ptr;
-	unsigned int	i;
+	long	i;
 
 	i = 0;
-	if (len <= 0 || ft_strlen(s) <= start)
+	if (!txt)
+		return (-1);
+	while (txt[i])
 	{
-		ptr = (char *)malloc(1 * sizeof(char));
-		*ptr = '\0';
-		return (ptr);
+		if (txt[i] == '\n')
+			return (i);
+		i++;
 	}
-	if (ft_strlen(s + start) < len)
-		len = ft_strlen(s + start);
-	ptr = (char *)malloc((len + 1) * sizeof(char));
-	if (!ptr)
-		return (0);
-	while (s[start] && len > 0)
-	{
-		ptr[i++] = s[start++];
-		len--;
-	}
-	ptr[i] = '\0';
+	return (-1);
+}
+
+char	*write_to_buffer(char *txt, char *to_remain)
+{
+	char	*ptr;
+
+	ptr = ft_strjoin(to_remain, txt);
+	free(to_remain);
 	return (ptr);
 }
 
-if (chunk[i] != '\n' || chunk[i] != '\0')
-	chunk = write_to_buffer(txt, BUFFER_SIZE);
-else
+char	*clean_the_buffer(char *to_remain)
+{
+	char	*ptr;
 
+	if (!to_remain)
+		return (NULL);
+	ptr = ft_substr(to_remain, (find_newline(to_remain) + 1),
+			ft_strlen(&to_remain[find_newline(to_remain)]));
+	free (to_remain);
+	return (ptr);
+}
 
 char	*get_next_line(int fd)
 {
-	char	txt[BUFFER_SIZE];
-	char	*chunk;
-	char	*to_return;
+	char		*txt;
+	static char	*to_remain;
+	char		*to_return;
 
-	if (read(fd, txt, BUFFER_SIZE) <= 0)
+	txt = (char *)malloc(BUFFER_SIZE + 1);
+	if (!txt)
 		return (NULL);
-	chunk = write_to_buffer(txt, BUFFER_SIZE);
-	to_return =
+	while (find_newline(to_remain) < 0)
+	{
+		ft_bzero(txt, BUFFER_SIZE + 1);
+		if (read(fd, txt, BUFFER_SIZE) <= 0)
+		{
+			to_return = ft_substr(to_remain, 0, ft_strlen(to_remain));
+			free (to_remain);
+			to_remain = NULL;
+			free (txt);
+			return (to_return);
+		}
+		else
+			to_remain = write_to_buffer(txt, to_remain);
+	}
+	to_return = ft_substr(to_remain, 0, find_newline(to_remain) + 1);
+	to_remain = clean_the_buffer(to_remain);
+	free(txt);
+	return (to_return);
 }
