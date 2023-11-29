@@ -5,80 +5,81 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ddavlety <ddavlety@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/24 12:41:50 by ddavlety          #+#    #+#             */
-/*   Updated: 2023/11/28 19:36:35 by ddavlety         ###   ########.fr       */
+/*   Created: 2023/11/29 16:17:56 by ddavlety          #+#    #+#             */
+/*   Updated: 2023/11/29 17:30:08 by ddavlety         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+char	*ft_strdup(char *s1)
 {
-	char			*ptr;
+	char			*dest;
 	unsigned int	i;
 
-	i = 0;
-	if (len <= 0 || ft_strlen(s) <= start || !s)
+	dest = (char *) malloc(ft_strlen(s1) + 1);
+	if (!dest)
 		return (NULL);
-	if (ft_strlen(s + start) < len)
-		len = ft_strlen(s + start);
-	ptr = (char *)malloc((len + 1) * sizeof(char));
-	if (!ptr)
-		return (0);
-	while (s[start] && len > 0)
+	i = 0;
+	while (s1[i])
 	{
-		ptr[i++] = s[start++];
-		len--;
+		dest[i] = s1[i];
+		i++;
 	}
-	ptr[i] = '\0';
-	return (ptr);
+	dest[i] = '\0';
+	return (dest);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+size_t	ft_strlen(char *s)
 {
+	int	i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}
+
+char	*ft_substr(char *s, unsigned int start, size_t len)
+{
+	size_t	i;
+	char	*str;
+
+	if (!s)
+		return (NULL);
+	if (start > ft_strlen(s))
+		return (malloc(1));
+	if (len > ft_strlen(s + start))
+		len = ft_strlen(s + start);
+	str = malloc((len + 1) * sizeof(char));
+	if (!str)
+		return (NULL);
+	i = 0;
+	while (i < len)
+	{
+		str[i] = s[start + i];
+		i++;
+	}
+	str[i] = 0;
+	return (str);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char			*res;
 	unsigned int	i;
 	unsigned int	j;
-	char			*ptr;
 
 	i = 0;
-	j = ft_strlen(s1) + ft_strlen(s2);
-	ptr = (char *)malloc((j + 1) * sizeof(char));
-	if (!ptr)
-		return (0);
-	if (s1)
-	{
-		while (*s1)
-			ptr[i++] = *s1++;
-	}
-	if (s2)
-	{
-		while (*s2)
-			ptr[i++] = *s2++;
-	}
-	ptr[i] = '\0';
-	return (ptr);
-}
-
-size_t	ft_strlen(const char *s)
-{
-	int	count;
-
-	count = 0;
-	if (!s)
-		return (0);
-	while (s[count])
-		count++;
-	return (count);
-}
-
-void	ft_bzero(void *s, unsigned long n)
-{
-	unsigned char	*ptr;
-
-	ptr = (unsigned char *)s;
-	while (n != 0)
-	{
-		n--;
-		ptr[n] = '\0';
-	}
+	j = 0;
+	res = (char *) malloc((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
+	if (!res)
+		return (NULL);
+	while (s1[j])
+		res[i++] = s1[j++];
+	j = 0;
+	while (s2[j])
+		res[i++] = s2[j++];
+	res[i] = '\0';
+	return (res);
 }

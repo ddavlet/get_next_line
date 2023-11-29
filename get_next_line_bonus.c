@@ -5,73 +5,100 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ddavlety <ddavlety@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/24 12:41:47 by ddavlety          #+#    #+#             */
-/*   Updated: 2023/11/28 19:36:33 by ddavlety         ###   ########.fr       */
+/*   Created: 2023/11/29 16:18:02 by ddavlety          #+#    #+#             */
+/*   Updated: 2023/11/29 17:24:51 by ddavlety         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
-long	find_newline(char *txt)
+static char	*nextto_return(char *s)
 {
-	long	i;
+	unsigned int	i;
 
 	i = 0;
-	if (!txt)
-		return (-1);
-	while (txt[i])
+	while (s[i])
 	{
-		if (txt[i] == '\n')
-			return (i);
+		if (s[i] == '\n')
+			return ((char *)&s[i]);
 		i++;
 	}
-	return (-1);
+	if (s[i] == '\n')
+		return ((char *)&s[i]);
+	return (NULL);
 }
 
-char	*write_to_buffer(char *txt, char *to_remain)
+static char	*write_toremain(char *to_return)
 {
 	char	*ptr;
+	size_t	i;
 
-	ptr = ft_strjoin(to_remain, txt);
-	free(to_remain);
-	return (ptr);
-}
-
-char	*clean_the_buffer(char *to_remain)
-{
-	char	*ptr;
-
-	if (!to_remain)
+	i = 0;
+	while (to_return[i] != '\n' && to_return[i] != '\0')
+		i++;
+	if (to_return[i] == 0 || to_return[1] == 0)
 		return (NULL);
-	ptr = ft_substr(to_remain, (find_newline(to_remain) + 1),
-			ft_strlen(&to_remain[find_newline(to_remain)]));
-	free (to_remain);
+	ptr = ft_substr(to_return, i + 1, ft_strlen(to_return) - i);
+	if (*ptr == 0)
+	{
+		free(ptr);
+		ptr = NULL;
+	}
+	to_return[i + 1] = 0;
 	return (ptr);
+}
+
+static char	*write_toreturn(int fd, char *to_remain, char *buffer)
+{
+	long	b_read;
+	char	*tmp;
+
+	b_read = 1;
+	while (b_read > 0)
+	{
+		b_read = read(fd, buffer, BUFFER_SIZE);
+		if (b_read == -1)
+		{
+			free(to_remain);
+			return (NULL);
+		}
+		else if (b_read == 0)
+			break ;
+		buffer[b_read] = 0;
+		if (!to_remain)
+			to_remain = ft_strdup("");
+		tmp = to_remain;
+		to_remain = ft_strjoin(tmp, buffer);
+		free(tmp);
+		tmp = NULL;
+		if (nextto_return(buffer))
+			break ;
+	}
+	return (to_remain);
 }
 
 char	*get_next_line(int fd)
 {
-	char		*txt[1024];
-	static char	*to_remain;
+	static char	*to_remain[1024];
 	char		*to_return;
+	char		*buffer;
 
-	txt[fd] = (char *)malloc(BUFFER_SIZE + 1);
-	while (find_newline(to_remain) < 0)
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buffer)
+		return (NULL);
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 	{
-		ft_bzero(txt[fd], BUFFER_SIZE + 1);
-		if (read(fd, txt[fd], BUFFER_SIZE) <= 0)
-		{
-			to_return = ft_substr(to_remain, 0, ft_strlen(to_remain));
-			free (to_remain);
-			to_remain = NULL;
-			free (txt[fd]);
-			return (to_return);
-		}
-		else
-			to_remain = write_to_buffer(txt[fd], to_remain);
+		free(to_remain[fd]);
+		free(buffer);
+		to_remain[fd] = NULL;
+		buffer = NULL;
+		return (NULL);
 	}
-	to_return = ft_substr(to_remain, 0, find_newline(to_remain) + 1);
-	to_remain = clean_the_buffer(to_remain);
-	free(txt[fd]);
+	to_return = write_toreturn(fd, to_remain[fd], buffer);
+	free(buffer);
+	buffer = NULL;
+	if (!to_return)
+		return (NULL);
+	to_remain[fd] = write_toremain(to_return);
 	return (to_return);
 }
