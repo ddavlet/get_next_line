@@ -6,13 +6,13 @@
 /*   By: ddavlety <ddavlety@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 16:18:02 by ddavlety          #+#    #+#             */
-/*   Updated: 2023/11/29 17:24:51 by ddavlety         ###   ########.fr       */
+/*   Updated: 2023/11/29 17:35:10 by ddavlety         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-static char	*nextto_return(char *s)
+static char	*nextline(char *s)
 {
 	unsigned int	i;
 
@@ -71,7 +71,7 @@ static char	*write_toreturn(int fd, char *to_remain, char *buffer)
 		to_remain = ft_strjoin(tmp, buffer);
 		free(tmp);
 		tmp = NULL;
-		if (nextto_return(buffer))
+		if (nextline(buffer))
 			break ;
 	}
 	return (to_remain);
