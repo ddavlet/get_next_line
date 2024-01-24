@@ -90,6 +90,6 @@ int main()
 	free(line);
 
 
-	close(fd);\n
+	close(fd);
 	return 0;
 }
